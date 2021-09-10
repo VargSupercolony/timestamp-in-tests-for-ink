@@ -19,17 +19,19 @@ mod incrementer {
         current_timestamp: Timestamp,
         next_allowed_timestamp: Timestamp,
         did_update_today: bool,
+        use_actual_timestamp: bool,
     }
 
     impl Incrementer {
         /// Constructor that initializes the `u16` value to `0`.
         #[ink(constructor)]
-        pub fn new() -> Self {
+        pub fn new(use_actual_timestamp: bool) -> Self {
             Self {
                 value: 0,
                 current_timestamp: Self::env().block_timestamp(),
                 next_allowed_timestamp: Self::env().block_timestamp() + ONE_DAY,
                 did_update_today: false,
+                use_actual_timestamp,
             }
         }
 
@@ -49,6 +51,7 @@ mod incrementer {
             self.value
         }
 
+        /// Checks for new day and if it is, allows incrementing
         #[ink(message)]
         pub fn check_update(&mut self) {
             if self.timestamp() > self.next_allowed_timestamp {
@@ -61,9 +64,12 @@ mod incrementer {
         }
 
         #[ink(message)]
-        #[inline]
         pub fn timestamp(&self) -> Timestamp {
-            self.current_timestamp
+            if self.use_actual_timestamp {
+                Self::env().block_timestamp()
+            } else {
+                self.current_timestamp
+            }
         }
 
         #[ink(message)]

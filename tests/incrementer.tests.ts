@@ -22,7 +22,7 @@ export const setupContract = async (name, constructor, ...args) => {
 
 describe('Incrementer', async () => {
   it('Should change timestamp via contract transaction', async () => {
-    const incrementer = await setupContract('incrementer', 'new')
+    const incrementer = await setupContract('incrementer', 'new', false)
     const timestampBefore = await incrementer.query.timestamp()
 
     // @ts-ignore
@@ -35,7 +35,7 @@ describe('Incrementer', async () => {
   })
 
   it('Should disallow to increment two or more times per day', async () => {
-    const incrementer = await setupContract('incrementer', 'new')
+    const incrementer = await setupContract('incrementer', 'new', false)
     await incrementer.tx.increment()
     const incremented = await incrementer.query.get()
 
@@ -51,10 +51,10 @@ describe('Incrementer', async () => {
   })
 
   it('Should allow to increment once again after one day - contract version', async () => {
-    const incrementer = await setupContract('incrementer', 'new')
+    const incrementer = await setupContract('incrementer', 'new', false)
     await incrementer.tx.increment()
 
-    const nextTimestamp = new Date().valueOf() + 24 * 60 * 60 * 1000
+    const nextTimestamp = new Date().valueOf() + 25 * 60 * 60 * 1000
     await incrementer.tx.setTimestamp(nextTimestamp) // THIS could be omitted - see the next test
 
     await expect(incrementer.tx.increment()).to.emit(incrementer.contract, 'TimestampsUpdated')
@@ -66,10 +66,10 @@ describe('Incrementer', async () => {
 
   // the test is skipped because it fails
   it.skip('Should allow to increment once again after one day - polkadot.js version', async () => {
-    const incrementer = await setupContract('incrementer', 'new')
+    const incrementer = await setupContract('incrementer', 'new', true)
     await incrementer.tx.increment()
 
-    const nextTimestamp = new Date().valueOf() + 24 * 60 * 60 * 1000
+    const nextTimestamp = new Date().valueOf() + 25 * 60 * 60 * 1000
     await api.tx.timestamp.set(nextTimestamp).signAndSend(incrementer.defaultSigner.pair)
 
     await expect(incrementer.tx.increment()).to.emit(incrementer.contract, 'TimestampsUpdated')
