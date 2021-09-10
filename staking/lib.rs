@@ -2,24 +2,6 @@
 
 use ink_lang as ink;
 
-pub trait Stakeable {
-    fn claim(&mut self, amount: Balance) {
-        self.staked_balances.insert(
-            self.env().caller(),
-            (self.env().block_timestamp() + ONE_DAY, amount),
-        );
-    }
-
-    #[ink(message)]
-    fn withdraw(&mut self) -> Option<Balance> {
-        let stake_info = self.staked_balances.get(&self.env().caller());
-        if stake_info.is_some() && self.env().block_timestamp() > stake_info.unwrap().0 {
-            stake_info.unwrap().1
-        }
-        None
-    }
-}
-
 #[ink::contract]
 mod staking {
     use ink_storage::collections::HashMap;
@@ -50,7 +32,7 @@ mod staking {
         pub fn withdraw(&mut self) -> Option<Balance> {
             let stake_info = self.staked_balances.get(&self.env().caller());
             if stake_info.is_some() && self.env().block_timestamp() > stake_info.unwrap().0 {
-                stake_info.unwrap().1
+                return Some(stake_info.unwrap().1);
             }
             None
         }

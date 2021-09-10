@@ -33,7 +33,7 @@ mod staking_mock {
         pub fn withdraw(&mut self) -> Option<Balance> {
             let stake_info = self.staked_balances.get(&self.env().caller());
             if stake_info.is_some() && self.get_current_timestamp() > stake_info?.0 {
-                stake_info?.1
+                return Some(stake_info.unwrap().1);
             }
             None
         }
