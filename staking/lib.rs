@@ -29,10 +29,10 @@ mod staking {
         }
 
         #[ink(message)]
-        pub fn withdraw(&mut self) -> Option<Balance> {
+        pub fn withdraw(&self) -> Option<Balance> {
             let stake_info = self.staked_balances.get(&self.env().caller());
-            if stake_info.is_some() && self.env().block_timestamp() > stake_info.unwrap().0 {
-                return Some(stake_info.unwrap().1);
+            if self.env().block_timestamp() >= stake_info?.0 {
+                return Some(stake_info?.1);
             }
             None
         }
